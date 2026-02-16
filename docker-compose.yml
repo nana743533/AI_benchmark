@@ -1,0 +1,54 @@
+# AI Coding Agent Benchmark - Accounting Software
+# Docker Compose configuration
+
+version: '3.8'
+
+services:
+  # Application container (agent's implementation)
+  app:
+    build:
+      context: .
+      target: development
+    container_name: ai-benchmark-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      # - DATABASE_URL=postgresql://postgres:password@db:5432/accounting
+      # - DATABASE_URL=sqlite:///data/accounting.db
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    depends_on:
+      - db
+    networks:
+      - benchmark-network
+
+  # Database service
+  db:
+    image: postgres:15-alpine
+    container_name: ai-benchmark-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=accounting
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - benchmark-network
+    # For SQLite, comment out this service
+
+  # Alternative: SQLite (uncomment if using SQLite)
+  # sqlite:
+  #   image: alpine:latest
+  #   volumes:
+  #     - db-data:/data
+
+volumes:
+  db-data:
+
+networks:
+  benchmark-network:
+    driver: bridge

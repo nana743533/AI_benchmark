@@ -1,0 +1,33 @@
+{
+  "name": "ai-benchmark-accounting-software",
+  "version": "1.0.0",
+  "description": "AI Coding Agent Benchmark - Accounting Software Implementation Challenge (Technology Stack Agnostic)",
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:api && npm run test:mcp && npm run test:e2e",
+    "test:api": "vitest run tests/api",
+    "test:api:watch": "vitest tests/api",
+    "test:mcp": "vitest run tests/mcp",
+    "test:mcp:watch": "vitest tests/mcp",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:all": "npm run test:api && npm run test:mcp && npm run test:e2e",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "benchmark",
+    "ai",
+    "coding-agent",
+    "accounting",
+    "double-entry-bookkeeping"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  }
+}
