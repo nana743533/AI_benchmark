@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "lib": ["ES2022"],
     "strict": true,
     "esModuleInterop": true,
@@ -11,6 +11,6 @@
     "resolveJsonModule": true,
     "types": ["node", "vitest/globals", "@playwright/test"]
   },
-  "include": ["tests/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/*"]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
