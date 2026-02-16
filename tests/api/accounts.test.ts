@@ -40,6 +40,11 @@ interface JournalLine {
 let testAccountId: string;
 let testJournalEntryId: string;
 
+// Reset database before all tests
+beforeAll(async () => {
+  await fetch(`${API_BASE_URL}/api/test/reset`, { method: 'POST' });
+});
+
 describe('Account Management API', () => {
   describe('GET /api/accounts - List accounts', () => {
     it('should return list of accounts', async () => {
@@ -206,10 +211,42 @@ describe('Account Management API', () => {
     });
 
     it('should reject deletion of used account', async () => {
-      // Try to delete an account that's used in journal entries (code: 100 '現金')
-      const listResponse = await fetch(`${API_BASE_URL}/api/accounts`);
-      const listData = await listResponse.json();
-      const cashAccount = listData.data.find((a: Account) => a.code === '100');
+      // First, create a journal entry to make an account "used"
+      const accountsResponse = await fetch(`${API_BASE_URL}/api/accounts`);
+      const accountsData = await accountsResponse.json();
+
+      // Use first available asset account (e.g., 101 '預金')
+      const debitAccount = accountsData.data.find((a: Account) => a.type === 'asset');
+      const creditAccount = accountsData.data.find((a: Account) => a.type === 'revenue');
+
+      if (!debitAccount || !creditAccount) {
+        return; // Skip if required accounts not found
+      }
+
+      // Create a journal entry first
+      await fetch(`${API_BASE_URL}/api/journal-entries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: '2024-01-15',
+          description: 'テスト用仕訳',
+          lines: [
+            {
+              accountId: debitAccount.id,
+              debitAmount: 1000,
+              creditAmount: 0
+            },
+            {
+              accountId: creditAccount.id,
+              debitAmount: 0,
+              creditAmount: 1000
+            }
+          ]
+        })
+      });
+
+      // Now try to delete the used account
+      const cashAccount = debitAccount;
 
       if (!cashAccount) {
         return; // Skip if account not found
@@ -230,8 +267,8 @@ describe('Journal Entry API', () => {
       // Get account IDs first
       const accountsResponse = await fetch(`${API_BASE_URL}/api/accounts`);
       const accountsData = await accountsResponse.json();
-      const cashAccount = accountsData.data.find((a: Account) => a.code === '100');
-      const salesAccount = accountsData.data.find((a: Account) => a.code === '400');
+      const cashAccount = accountsData.data.find((a: Account) => a.type === 'asset') || accountsData.data.find((a: Account) => a.code === '101');
+      const salesAccount = accountsData.data.find((a: Account) => a.type === 'revenue') || accountsData.data.find((a: Account) => a.code === '400');
 
       if (!cashAccount || !salesAccount) {
         throw new Error('Required accounts not found');
